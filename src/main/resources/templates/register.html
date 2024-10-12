@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>회원가입</title>
+</head>
+<body>
+<h1>회원가입 페이지</h1>
+<form th:action="@{/register}" method="post">
+    <label>ID: <input type="text" name="userId"/></label><br/>
+    <label>Email: <input type="email" name="userEmail"/></label><br/>
+    <label>Password: <input type="password" name="userPassword"/></label><br/>
+    <button type="submit">회원가입</button>
+</form>
+<div th:if="${param.error}">
+    <p style="color:red;">회원가입 실패. 다시 시도해주세요.</p>
+</div>
+<a th:href="@{/login}">로그인</a>
+</body>
+</html>
