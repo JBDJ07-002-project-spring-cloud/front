@@ -82,7 +82,6 @@ public class AuthController {
         }
 
         try {
-            System.out.println("로그인 시도: " + loginRequest.getUserName());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getUserName(), loginRequest.getUserPassword())
