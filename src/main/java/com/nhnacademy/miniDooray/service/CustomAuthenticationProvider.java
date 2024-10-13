@@ -24,25 +24,28 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String userId = authentication.getName();
-        String password = (String) authentication.getCredentials();
+        String userName = authentication.getName();
+        String userPassword = (String) authentication.getCredentials();
 
-        String url = accountApiUrl + "/auth/user/" + userId;
+        String url = accountApiUrl + "/auth/login";
+
+        Map<String, String> request = new HashMap<>();
+        request.put("userName", userName);
+        request.put("userPw", userPassword);
 
         try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-            if (response.getStatusCode() == HttpStatus.OK) {
-                Map<String, Object> userMap = response.getBody();
-                String encodedPassword = (String) userMap.get("userPassword");
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
 
-                if (passwordEncoder.matches(password, encodedPassword)) {
-                    List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-                    return new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                } else {
-                    throw new BadCredentialsException("Invalid username or password");
-                }
-            } else {
+            if (response.getStatusCode() == HttpStatus.OK) {
+                Map<String, Object> responseBody = response.getBody();
+                Long userId = ((Number) responseBody.get("userId")).longValue();
+
+                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                return new UsernamePasswordAuthenticationToken(userName, null, authorities);
+            } else if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new BadCredentialsException("Invalid username or password");
+            } else {
+                throw new AuthenticationServiceException("Authentication service unavailable");
             }
         } catch (Exception e) {
             throw new AuthenticationServiceException("Authentication service unavailable", e);

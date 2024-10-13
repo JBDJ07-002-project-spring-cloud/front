@@ -21,7 +21,6 @@ public class UserIdHeaderInterceptor implements ClientHttpRequestInterceptor {
             byte[] body,
             ClientHttpRequestExecution execution) throws IOException {
 
-        // 요청 URI가 task-api로 시작하는지 확인
         if (request.getURI().toString().startsWith(taskApiUrl)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -35,37 +36,54 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(
-            @RequestParam String userId,
+            @RequestParam String userName,
             @RequestParam String userPassword,
-            @RequestParam String userEmail
+            @RequestParam String userEmail,
+            Model model
     ) {
-        boolean success = authService.registerUser(userId, userPassword, userEmail);
+        boolean success = authService.registerUser(userName, userPassword, userEmail);
         if (success) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         } else {
-            return "redirect:/register?error=회원가입 실패. 다시 시도해주세요.";
+            model.addAttribute("error", "회원가입 실패. 다시 시도해주세요.");
+            return "register";
         }
     }
 
     @PostMapping("/login")
     public String login(
-            @RequestParam String username,
-            @RequestParam String password
+            @RequestParam String userName,
+            @RequestParam String userPassword,
+            Model model
     ) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
+                    new UsernamePasswordAuthenticationToken(userName, userPassword)
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             return "redirect:/dashboard";
         } catch (AuthenticationException e) {
-            return "redirect:/login?error";
+            model.addAttribute("error", "로그인 실패. 아이디와 비밀번호를 확인하세요.");
+            return "login";
         }
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public String logout() {
-        return "redirect:/login?logout";
+        SecurityContextHolder.clearContext();
+        return "redirect:/auth/login?logout";
+    }
+
+    @PostMapping("/withdraw")
+    public String withdraw(@RequestParam String userName, Model model) {
+        boolean success = authService.withdrawUser(userName);
+        if (success) {
+            SecurityContextHolder.clearContext();
+            return "redirect:/auth/login?withdraw=success";
+        } else {
+            model.addAttribute("error", "회원탈퇴 실패. 다시 시도해주세요.");
+            return "dashboard";
+        }
     }
 }
