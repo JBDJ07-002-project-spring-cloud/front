@@ -1,4 +1,4 @@
-package com.nhnacademy.miniDooray.controller;
+package com.nhnacademy.miniDooray.server.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
