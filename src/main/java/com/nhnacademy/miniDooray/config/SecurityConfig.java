@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/auth/**", "/project/**")
+                        .ignoringRequestMatchers("/auth/**", "/project/**", "/task/**")
                 );
 
         return http.build();
