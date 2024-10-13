@@ -1,49 +1,53 @@
 package com.nhnacademy.miniDooray.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private final RestTemplate restTemplate;
-    private final String accountApiUrl = "http://localhost:8081";
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${account-api.url}")
+    private String accountApiUrl;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String userId = authentication.getName();
         String password = (String) authentication.getCredentials();
 
-        String url = accountApiUrl + "/auth/login";
+        String url = accountApiUrl + "/auth/user/" + userId;
 
-        Map<String, String> request = new HashMap<>();
-        request.put("userId", userId);
-        request.put("userPw", password);
+        try {
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                Map<String, Object> userMap = response.getBody();
+                String encodedPassword = (String) userMap.get("userPassword");
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            // 로그인 성공
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-            return new UsernamePasswordAuthenticationToken(userId, password, authorities);
-        } else {
-            // 로그인 실패
-            throw new BadCredentialsException("Invalid username or password");
+                if (passwordEncoder.matches(password, encodedPassword)) {
+                    // 비밀번호 일치
+                    List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                    return new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                } else {
+                    // 비밀번호 불일치
+                    throw new BadCredentialsException("Invalid username or password");
+                }
+            } else {
+                throw new BadCredentialsException("Invalid username or password");
+            }
+        } catch (Exception e) {
+            throw new AuthenticationServiceException("Authentication service unavailable", e);
         }
     }
 

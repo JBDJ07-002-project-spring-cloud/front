@@ -6,9 +6,10 @@
 <body>
 <h1>로그인 페이지</h1>
 <form th:action="@{/login}" method="post">
-    <label>ID: <input type="text" name="userId"/></label><br/>
+    <label>ID: <input type="text" name="username"/></label><br/>
     <label>Password: <input type="password" name="password"/></label><br/>
     <button type="submit">로그인</button>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 </form>
 <div th:if="${param.error}">
     <p style="color:red;">로그인 실패. 아이디와 비밀번호를 확인하세요.</p>

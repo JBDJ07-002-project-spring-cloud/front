@@ -1,6 +1,7 @@
 package com.nhnacademy.miniDooray.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,9 @@ public class AuthService {
 
     private final RestTemplate restTemplate;
     private final PasswordEncoder passwordEncoder;
-    private final String accountApiUrl = "http://localhost:8081";
+
+    @Value("${account-api.url}")
+    private String accountApiUrl;
 
     public boolean registerUser(String userId, String userPassword, String userEmail) {
         String url = accountApiUrl + "/auth/sign-in";
