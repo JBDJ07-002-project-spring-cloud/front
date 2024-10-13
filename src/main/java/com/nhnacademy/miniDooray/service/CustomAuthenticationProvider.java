@@ -36,11 +36,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 String encodedPassword = (String) userMap.get("userPassword");
 
                 if (passwordEncoder.matches(password, encodedPassword)) {
-                    // 비밀번호 일치
                     List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
                     return new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 } else {
-                    // 비밀번호 불일치
                     throw new BadCredentialsException("Invalid username or password");
                 }
             } else {
