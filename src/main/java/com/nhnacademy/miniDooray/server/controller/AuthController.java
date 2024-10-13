@@ -1,7 +1,7 @@
 package com.nhnacademy.miniDooray.server.controller;
 
 import com.nhnacademy.miniDooray.server.dto.account.LoginRequest;
-import com.nhnacademy.miniDooray.server.dto.account.ResponseDTO;
+import com.nhnacademy.miniDooray.server.dto.account.ResponseDto;
 import com.nhnacademy.miniDooray.server.dto.account.UserRegistrationRequest;
 import com.nhnacademy.miniDooray.server.exception.account.UserLoginFailedException;
 import com.nhnacademy.miniDooray.server.exception.account.UserRegisterFailedException;
@@ -30,8 +30,19 @@ public class AuthController {
         if (error != null) {
             model.addAttribute("error", error);
         }
-        return "login";
+        model.addAttribute("loginRequest", new LoginRequest());
+        return "auth/login";
     }
+
+
+    @GetMapping("/sign-in")
+    public String signInForm(Model model, @RequestParam(required = false) String error) {
+        if (error != null) {
+            model.addAttribute("error", error);
+        }
+        return "auth/sign-in";
+    }
+
 
     @GetMapping("/register")
     public String registerForm(Model model, @RequestParam(required = false) String error) {
@@ -52,7 +63,7 @@ public class AuthController {
         }
 
         try {
-            ResponseDTO response = authService.registerUser(userRequest);
+            ResponseDto response = authService.registerUser(userRequest);
             return "redirect:/auth/login";
         } catch (UserRegisterFailedException e) {
             model.addAttribute("error", e.getMessage());
@@ -71,11 +82,13 @@ public class AuthController {
         }
 
         try {
+            System.out.println("로그인 시도: " + loginRequest.getUserName());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getUserName(), loginRequest.getUserPassword())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            authService.loginUser(loginRequest);
             return "redirect:/dashboard";
         } catch (AuthenticationException e) {
             model.addAttribute("error", "로그인 실패. 아이디와 비밀번호를 확인하세요.");

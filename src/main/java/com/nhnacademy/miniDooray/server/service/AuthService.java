@@ -2,7 +2,7 @@ package com.nhnacademy.miniDooray.server.service;
 
 import com.nhnacademy.miniDooray.server.adapter.Adapter;
 import com.nhnacademy.miniDooray.server.dto.account.LoginRequest;
-import com.nhnacademy.miniDooray.server.dto.account.ResponseDTO;
+import com.nhnacademy.miniDooray.server.dto.account.ResponseDto;
 import com.nhnacademy.miniDooray.server.dto.account.UserRegistrationRequest;
 import com.nhnacademy.miniDooray.server.exception.account.UserLoginFailedException;
 import com.nhnacademy.miniDooray.server.exception.account.UserRegisterFailedException;
@@ -25,13 +25,13 @@ public class AuthService {
     @Value("${account-api.url}")
     private String accountApiUrl;
 
-    public ResponseDTO registerUser(UserRegistrationRequest userRequest) {
+    public ResponseDto registerUser(UserRegistrationRequest userRequest) {
         String url = accountApiUrl + "/auth/sign-in";
 
         try {
-            userRequest.setUserPassword(passwordEncoder.encode(userRequest.getUserPassword()));
+            // userRequest.setUserPassword(passwordEncoder.encode(userRequest.getUserPassword()));
 
-            ResponseEntity<ResponseDTO> response = adapter.post(url, userRequest, ResponseDTO.class);
+            ResponseEntity<ResponseDto> response = adapter.post(url, userRequest, ResponseDto.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();
@@ -43,11 +43,11 @@ public class AuthService {
         }
     }
 
-    public ResponseDTO loginUser(LoginRequest loginRequest) {
+    public ResponseDto loginUser(LoginRequest loginRequest) {
         String url = accountApiUrl + "/auth/login";
 
         try {
-            ResponseEntity<ResponseDTO> response = adapter.post(url, loginRequest, ResponseDTO.class);
+            ResponseEntity<ResponseDto> response = adapter.post(url, loginRequest, ResponseDto.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();
@@ -63,7 +63,7 @@ public class AuthService {
         String url = accountApiUrl + "/auth/withdraw";
 
         try {
-            ResponseEntity<ResponseDTO> response = adapter.patch(url, Map.of("userName", userName), ResponseDTO.class);
+            ResponseEntity<ResponseDto> response = adapter.patch(url, Map.of("userName", userName), ResponseDto.class);
             return response.getStatusCode().is2xxSuccessful();
         } catch (HttpClientErrorException e) {
             return false;
