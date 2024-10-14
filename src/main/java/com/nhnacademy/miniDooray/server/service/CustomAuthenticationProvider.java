@@ -31,14 +31,14 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         Map<String, String> request = new HashMap<>();
         request.put("userName", userName);
-        request.put("userPw", userPassword);
+        request.put("userPassword", userPassword);
 
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                Map<String, Object> responseBody = response.getBody();
-                Long userId = ((Number) responseBody.get("userId")).longValue();
+                //Map<String, Object> responseBody = response.getBody();
+                //Long userId = ((Number) responseBody.get("userId")).longValue(); -> response는 responseDTo(status)받아옴
 
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
                 return new UsernamePasswordAuthenticationToken(userName, null, authorities);
